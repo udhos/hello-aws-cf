@@ -1,53 +1,92 @@
 ---
-  AWSTemplateFormatVersion: "2010-09-09"
+AWSTemplateFormatVersion: "2010-09-09"
 
-  Description: Creates a VPC with web application
-  Parameters:
-    VPCName:
-      Description: Name for the VPC
-      Type: String
-      Default: vpc-web
+Description: Creates a VPC with web application
+Parameters:
+  VPCName:
+    Description: Name for the VPC
+    Type: String
+    Default: vpc-web
 
-  Mappings:
-    SubnetConfig:
-      VPC:
-        CIDR: "10.0.0.0/16"
-      Public0:
-        CIDR: "10.0.0.0/24"
-      Public1:
-        CIDR: "10.0.1.0/24"
-      Private0:
-        CIDR: "10.1.0.0/24"
-      Private1:
-        CIDR: "10.1.1.0/24"
-
-  Resources:
-
+Mappings:
+  SubnetConfig:
     VPC:
-      Type: "AWS::EC2::VPC"
-      Properties:
-        EnableDnsSupport: "true"
-        EnableDnsHostnames: "true"
-        CidrBlock:
-          Fn::FindInMap:
-            - "SubnetConfig"
-            - "VPC"
-            - "CIDR"
-        Tags:
-          -
-            Key: "Application"
-            Value:
-              Ref: "AWS::StackName"
-          -
-            Key: "Name"
-            Value: !Ref 'VPCName'
+      CIDR: "10.0.0.0/16"
+    Public0:
+      CIDR: "10.0.0.0/24"
+    Public1:
+      CIDR: "10.0.1.0/24"
+    Private0:
+      CIDR: "10.1.0.0/24"
+    Private1:
+      CIDR: "10.1.1.0/24"
 
-  Outputs:
+  AZRegions:
+    sa-east-1:
+      AZs: ["a", "c"]
 
-    VPCId:
-      Description: "VPCId of VPC"
-      Value:
+Resources:
+
+  VPC:
+    Type: "AWS::EC2::VPC"
+    Properties:
+      EnableDnsSupport: "true"
+      EnableDnsHostnames: "true"
+      CidrBlock:
+        Fn::FindInMap:
+          - "SubnetConfig"
+          - "VPC"
+          - "CIDR"
+      Tags:
+        -
+          Key: "Application"
+          Value:
+            Ref: "AWS::StackName"
+        -
+          Key: "Name"
+          Value: !Ref 'VPCName'
+
+  PublicSubnet0:
+    Type: "AWS::EC2::Subnet"
+    Properties:
+      VpcId:
         Ref: "VPC"
-      Export:
-        Name: !Sub "${AWS::Region}-${AWS::StackName}-VPC"
+      AvailabilityZone:
+        Fn::Sub:
+          - "${AWS::Region}${AZ}"
+          - AZ: !Select [ 0, !FindInMap [ "AZRegions", !Ref "AWS::Region", "AZs" ] ]
+      CidrBlock:
+        Fn::FindInMap:
+          - "SubnetConfig"
+          - "Public0"
+          - "CIDR"
+      MapPublicIpOnLaunch: "true"
+      Tags:
+        -
+          Key: "Application"
+          Value:
+            Ref: "AWS::StackName"
+        -
+          Key: "Name"
+          Value: !Join
+            - ''
+            - - !Ref "VPCName"
+              - '-public-'
+              - !Select [ 0, !FindInMap [ "AZRegions", !Ref "AWS::Region", "AZs" ] ]
+
+Outputs:
+
+  VPCId:
+    Description: "VPCId of VPC"
+    Value:
+      Ref: "VPC"
+    Export:
+      Name: !Sub "${AWS::Region}-${AWS::StackName}-VPC"
+
+  PublicSubnet0:
+    Description: "SubnetId of public subnet 0"
+    Value:
+      Ref: "PublicSubnet0"
+    Export:
+      Name: !Sub "${AWS::Region}-${AWS::StackName}-PublicSubnet0"
 
