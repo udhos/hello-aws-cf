@@ -39,9 +39,6 @@
             Value:
               Ref: "AWS::StackName"
           -
-            Key: "Network"
-            Value: "Public"
-          -
             Key: "Name"
             Value: !Ref 'VPCName'
 
