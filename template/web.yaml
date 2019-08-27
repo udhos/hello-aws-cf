@@ -74,6 +74,30 @@ Resources:
               - '-public-'
               - !Select [ 0, !FindInMap [ "AZRegions", !Ref "AWS::Region", "AZs" ] ]
 
+  InternetGateway:
+    Type: "AWS::EC2::InternetGateway"
+    Properties:
+      Tags:
+        -
+          Key: "Application"
+          Value:
+            Ref: "AWS::StackName"
+        -
+          Key: "Name"
+          Value: !Join
+            - ''
+            - - !Ref "VPCName"
+              - '-IGW'
+
+  AttachIGWToVPC:
+    Type: "AWS::EC2::VPCGatewayAttachment"
+    Properties:
+      VpcId:
+        Ref: "VPC"
+      InternetGatewayId:
+        Ref: "InternetGateway"
+
+
 Outputs:
 
   VPCId:
