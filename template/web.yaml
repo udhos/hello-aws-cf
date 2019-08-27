@@ -1,0 +1,56 @@
+---
+  AWSTemplateFormatVersion: "2010-09-09"
+
+  Description: Creates a VPC with web application
+  Parameters:
+    VPCName:
+      Description: Name for the VPC
+      Type: String
+      Default: vpc-web
+
+  Mappings:
+    SubnetConfig:
+      VPC:
+        CIDR: "10.0.0.0/16"
+      Public0:
+        CIDR: "10.0.0.0/24"
+      Public1:
+        CIDR: "10.0.1.0/24"
+      Private0:
+        CIDR: "10.1.0.0/24"
+      Private1:
+        CIDR: "10.1.1.0/24"
+
+  Resources:
+
+    VPC:
+      Type: "AWS::EC2::VPC"
+      Properties:
+        EnableDnsSupport: "true"
+        EnableDnsHostnames: "true"
+        CidrBlock:
+          Fn::FindInMap:
+            - "SubnetConfig"
+            - "VPC"
+            - "CIDR"
+        Tags:
+          -
+            Key: "Application"
+            Value:
+              Ref: "AWS::StackName"
+          -
+            Key: "Network"
+            Value: "Public"
+          -
+            Key: "Name"
+            Value: !Ref 'VPCName'
+
+  Outputs:
+
+    VPCId:
+      Description: "VPCId of VPC"
+      Value:
+        Ref: "VPC"
+      Export:
+        Name: !Sub "${AWS::Region}-${AWS::StackName}-VPC"
+
