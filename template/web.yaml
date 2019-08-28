@@ -15,6 +15,10 @@ Parameters:
     Default: 0.0.0.0/0
     AllowedPattern: (\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})/(\d{1,2})
     ConstraintDescription: must be a valid IP CIDR range of the form x.x.x.x/x.
+  KeyName:
+    Description: Existing SSH key name for EC2 instance
+    Type: AWS::EC2::KeyPair::KeyName
+    ConstraintDescription: must be the name of an existing EC2 KeyPair.
 
 Mappings:
   SubnetConfig:
@@ -162,6 +166,26 @@ Resources:
             - - !Ref "VPCName"
               - SSHSecurityGroup
 
+  Eth0:
+    Type: AWS::EC2::NetworkInterface
+    Properties:
+      Description: eth0
+      GroupSet: [!Ref 'SSHSecurityGroup']
+      SubnetId: !Ref PublicSubnet0
+
+  EC2Instance:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: ami-058943e7d9b9cabfb
+      InstanceType: t3.micro
+      KeyName: !Ref 'KeyName'
+      NetworkInterfaces:
+      - NetworkInterfaceId: !Ref 'Eth0'
+        DeviceIndex: '0'
+      Tags:
+      - Key: Name
+        Value: instance-web
+
 Outputs:
 
   VPCId:
@@ -177,4 +201,9 @@ Outputs:
       Ref: "PublicSubnet0"
     Export:
       Name: !Sub "${AWS::Region}-${AWS::StackName}-PublicSubnet0"
+
+  InstanceId:
+    Value: !Ref 'EC2Instance'
+    Description: Instance Id of newly created instance
+
 
