@@ -144,13 +144,13 @@ Resources:
       RouteTableId:
         Ref: "PublicRouteTable"
 
-  SSHSecurityGroup:
+  WebSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
       GroupName: !Join
         - '-'
         - - !Ref "VPCName"
-          - SSHSecurityGroup
+          - WebSecurityGroup
       VpcId: !Ref VPC
       GroupDescription: Enable SSH access via port 22
       SecurityGroupIngress:
@@ -158,19 +158,31 @@ Resources:
         FromPort: '22'
         ToPort: '22'
         CidrIp: !Ref 'SSHLocation'
+      - IpProtocol: tcp
+        FromPort: 80
+        ToPort: 80
+        CidrIp: '0.0.0.0/0'
+      - IpProtocol: tcp
+        FromPort: 8080
+        ToPort: 8080
+        CidrIp: '0.0.0.0/0'
+      - IpProtocol: tcp
+        FromPort: 443
+        ToPort: 443
+        CidrIp: '0.0.0.0/0'
       Tags:
         -
           Key: Name
           Value: !Join
             - '-'
             - - !Ref "VPCName"
-              - SSHSecurityGroup
+              - WebSecurityGroup
 
   Eth0:
     Type: AWS::EC2::NetworkInterface
     Properties:
       Description: eth0
-      GroupSet: [!Ref 'SSHSecurityGroup']
+      GroupSet: [!Ref 'WebSecurityGroup']
       SubnetId: !Ref PublicSubnet0
 
   EC2Instance:
