@@ -143,6 +143,10 @@ Resources:
   SSHSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
+      GroupName: !Join
+        - '-'
+        - - !Ref "VPCName"
+          - SSHSecurityGroup
       VpcId: !Ref VPC
       GroupDescription: Enable SSH access via port 22
       SecurityGroupIngress:
@@ -150,6 +154,13 @@ Resources:
         FromPort: '22'
         ToPort: '22'
         CidrIp: !Ref 'SSHLocation'
+      Tags:
+        -
+          Key: Name
+          Value: !Join
+            - '-'
+            - - !Ref "VPCName"
+              - SSHSecurityGroup
 
 Outputs:
 
