@@ -201,6 +201,7 @@ Resources:
         Fn::Base64: 
           !Sub |
             #!/bin/bash
+            # userdata script - begin
 
             APP_URL=https://github.com/udhos/gowebhello/releases/download/v0.7/gowebhello_linux_amd64
 
@@ -293,6 +294,7 @@ Resources:
 
             echo "check service: systemctl status web healthcheck"
             echo "check logs:    journalctl -u web -u healthcheck -f"
+            # userdata script - begin
 
 Outputs:
 
