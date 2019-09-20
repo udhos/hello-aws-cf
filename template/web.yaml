@@ -294,7 +294,7 @@ Resources:
 
             echo "check service: systemctl status web healthcheck"
             echo "check logs:    journalctl -u web -u healthcheck -f"
-            # userdata script - begin
+            # userdata script - end
 
 Outputs:
 
